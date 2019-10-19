@@ -118,12 +118,15 @@ addGotoModeKeys() {
 addGotoMode() {
     table -next copy-mode-kakoune copy-mode-kakoune-goto
     addGotoModeKeys -move
+    table -next copy-mode-kakoune copy-mode-kakoune-goto-extend
+    addGotoModeKeys -extend
 }
 
 addNormalMode() {
     table -next copy-mode-kakoune copy-mode-kakoune
     map -next '' Escape cancel
     map -next copy-mode-kakoune-goto g
+    map -next copy-mode-kakoune-goto-extend G
     map -move   h cursor-left
     map -extend H cursor-left
     map -move   j cursor-down
