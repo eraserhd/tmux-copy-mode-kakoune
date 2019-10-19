@@ -115,7 +115,7 @@ addGotoModeKeys() {
     map $moveOrExtend C middle-line
 }
 
-addGotoMode() {
+addGotoModes() {
     table -next copy-mode-kakoune copy-mode-kakoune-goto
     addGotoModeKeys -move
     table -next copy-mode-kakoune copy-mode-kakoune-goto-extend
@@ -138,7 +138,7 @@ addNormalMode() {
 }
 
 addNormalMode
-addGotoMode
+addGotoModes
 
 tmux bind-key -Tprefix '[' '
     copy-mode
