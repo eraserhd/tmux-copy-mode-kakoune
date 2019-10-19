@@ -51,14 +51,17 @@ addNormalMode() {
     map -extend L cursor-right
 }
 
+addEntryPoints() {
+    tmux bind-key -Tprefix '[' '
+        copy-mode
+        switch-client -Tcopy-mode-kakoune
+    '
+    tmux bind-key -Tctrlw N '
+        copy-mode
+        switch-client -Tcopy-mode-kakoune
+    '
+}
+
 addNormalMode
 addGotoModes
-
-tmux bind-key -Tprefix '[' '
-    copy-mode
-    switch-client -Tcopy-mode-kakoune
-'
-tmux bind-key -Tctrlw N '
-    copy-mode
-    switch-client -Tcopy-mode-kakoune
-'
+addEntryPoints
