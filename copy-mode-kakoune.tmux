@@ -76,9 +76,6 @@ map() {
     if [[ -z $key ]]; then
         die 'no key given'
     fi
-    if [[ -z $commands ]]; then
-        die 'no commands given'
-    fi
     if [[ $isMove -eq 1 ]]; then
         commands="
             ${commands}
@@ -95,9 +92,6 @@ map() {
 }
 
 addGotoMode() {
-    tmux bind-key -Tcopy-mode-kakoune g '
-        switch-client -Tcopy-mode-kakoune-g
-    '
     table -next copy-mode-kakoune copy-mode-kakoune-g
     map -move g history-top
     map -move G history-top
@@ -124,6 +118,7 @@ addGotoMode() {
 addNormalMode() {
     table -next copy-mode-kakoune copy-mode-kakoune
     map -next '' Escape cancel
+    map -next copy-mode-kakoune-g g
     map -move   h cursor-left
     map -extend H cursor-left
     map -move   j cursor-down
