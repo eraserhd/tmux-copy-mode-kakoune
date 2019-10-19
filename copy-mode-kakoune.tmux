@@ -92,7 +92,7 @@ map() {
 }
 
 addGotoMode() {
-    table -next copy-mode-kakoune copy-mode-kakoune-g
+    table -next copy-mode-kakoune copy-mode-kakoune-goto
     map -move g history-top
     map -move G history-top
     map -move k history-top
@@ -118,7 +118,7 @@ addGotoMode() {
 addNormalMode() {
     table -next copy-mode-kakoune copy-mode-kakoune
     map -next '' Escape cancel
-    map -next copy-mode-kakoune-g g
+    map -next copy-mode-kakoune-goto g
     map -move   h cursor-left
     map -extend H cursor-left
     map -move   j cursor-down
