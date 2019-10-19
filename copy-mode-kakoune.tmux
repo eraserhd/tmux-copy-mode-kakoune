@@ -65,10 +65,9 @@ map() {
             *)
                 if [[ -z $key ]]; then
                     key="$1"
-                elif [[ -z $commands ]]; then
-                    commands="$1"
                 else
-                    die 'too many arguments'
+                    commands="${commands}
+                        send-keys -X $1"
                 fi
                 ;;
         esac
@@ -100,71 +99,29 @@ addGotoMode() {
         switch-client -Tcopy-mode-kakoune-g
     '
     table -next copy-mode-kakoune copy-mode-kakoune-g
-    map -move g '
-        send-keys -X history-top
-    '
-    map -move k '
-        send-keys -X history-top
-    '
-    map -move l '
-        send-keys -X end-of-line
-        send-keys -X cursor-left
-    '
-    map -move h '
-        send-keys -X start-of-line
-    '
-    map -move i '
-        send-keys -X back-to-indentation
-    '
-    map -move j '
-        send-keys -X history-bottom
-        send-keys -X start-of-line
-    '
-    map -move e '
-        send-keys -X history-bottom
-        send-keys -X end-of-line
-        send-keys -X cursor-left
-    '
-    map -move t '
-        send-keys -X top-line
-    '
-    map -move b '
-        send-keys -X bottom-line
-    '
-    map -move c '
-        send-keys -X middle-line
-    '
+    map -move g history-top
+    map -move k history-top
+    map -move l end-of-line cursor-left
+    map -move h start-of-line
+    map -move i back-to-indentation
+    map -move j history-bottom start-of-line
+    map -move e history-bottom end-of-line cursor-left
+    map -move t top-line
+    map -move b bottom-line
+    map -move c middle-line
 }
 
 addNormalMode() {
     table -next copy-mode-kakoune copy-mode-kakoune
-    map -next '' Escape '
-        send-keys -X cancel
-    '
-    map -move h '
-        send-keys -X cursor-left
-    '
-    map -extend H '
-        send-keys -X cursor-left
-    '
-    map -move j '
-        send-keys -X cursor-down
-    '
-    map -extend J '
-        send-keys -X cursor-down
-    '
-    map -move k '
-        send-keys -X cursor-up
-    '
-    map -extend K '
-        send-keys -X cursor-up
-    '
-    map -move l '
-        send-keys -X cursor-right
-    '
-    map -extend L '
-        send-keys -X cursor-right
-    '
+    map -next '' Escape cancel
+    map -move   h cursor-left
+    map -extend H cursor-left
+    map -move   j cursor-down
+    map -extend J cursor-down
+    map -move   k cursor-up
+    map -extend K cursor-up
+    map -move   l cursor-right
+    map -extend L cursor-right
 }
 
 addNormalMode
