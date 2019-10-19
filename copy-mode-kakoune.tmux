@@ -47,8 +47,14 @@ map() {
     local next="${currentTableNext}"
     local key=''
     local commands=''
+    local isMove=0
     while [[ $# -ne 0 ]]; do
         case "$1" in
+            -extend)
+                ;;
+            -move)
+                isMove=1
+                ;;
             -next)
                 next="$2"
                 shift
@@ -74,6 +80,12 @@ map() {
     if [[ -z $commands ]]; then
         die 'no commands given'
     fi
+    if [[ $isMove -eq 1 ]]; then
+        commands="
+            ${commands}
+            send-keys -X begin-selection
+        "
+    fi
     if [[ -n $next ]]; then
         commands="
             ${commands}
@@ -88,49 +100,39 @@ addGotoMode() {
         switch-client -Tcopy-mode-kakoune-g
     '
     startTable -next copy-mode-kakoune copy-mode-kakoune-g
-    map g '
+    map -move g '
         send-keys -X history-top
-        send-keys -X begin-selection
     '
-    map k '
+    map -move k '
         send-keys -X history-top
-        send-keys -X begin-selection
     '
-    map l '
+    map -move l '
         send-keys -X end-of-line
         send-keys -X cursor-left
-        send-keys -X begin-selection
     '
-    map h '
+    map -move h '
         send-keys -X start-of-line
-        send-keys -X begin-selection
     '
-    map i '
+    map -move i '
         send-keys -X back-to-indentation
-        send-keys -X begin-selection
     '
-    map j '
+    map -move j '
         send-keys -X history-bottom
         send-keys -X start-of-line
-        send-keys -X begin-selection
     '
-    map e '
+    map -move e '
         send-keys -X history-bottom
         send-keys -X end-of-line
         send-keys -X cursor-left
-        send-keys -X begin-selection
     '
-    map t '
+    map -move t '
         send-keys -X top-line
-        send-keys -X begin-selection
     '
-    map b '
+    map -move b '
         send-keys -X bottom-line
-        send-keys -X begin-selection
     '
-    map c '
+    map -move c '
         send-keys -X middle-line
-        send-keys -X begin-selection
     '
 }
 
@@ -139,32 +141,28 @@ addNormalMode() {
     map -next '' Escape '
         send-keys -X cancel
     '
-    map h '
-        send-keys -X cursor-left
-        send-keys -X begin-selection
-    '
-    map H '
+    map -move h '
         send-keys -X cursor-left
     '
-    map j '
+    map -extend H '
+        send-keys -X cursor-left
+    '
+    map -move j '
         send-keys -X cursor-down
-        send-keys -X begin-selection
     '
-    map J '
+    map -extend J '
         send-keys -X cursor-down
     '
-    map k '
-        send-keys -X cursor-up
-        send-keys -X begin-selection
-    '
-    map K '
+    map -move k '
         send-keys -X cursor-up
     '
-    map l '
+    map -extend K '
+        send-keys -X cursor-up
+    '
+    map -move l '
         send-keys -X cursor-right
-        send-keys -X begin-selection
     '
-    map L '
+    map -extend L '
         send-keys -X cursor-right
     '
 }
