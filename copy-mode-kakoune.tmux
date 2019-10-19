@@ -41,21 +41,22 @@ addNormalMode() {
     map -next '' Escape cancel
     map -next copy-mode-kakoune-goto g
     map -next copy-mode-kakoune-goto-extend G
-    map -move   h cursor-left
-    map -extend H cursor-left
-    map -move   j cursor-down
-    map -extend J cursor-down
-    map -move   k cursor-up
-    map -extend K cursor-up
-    map -move   l cursor-right
-    map -extend L cursor-right
-    map         w cursor-right begin-selection next-word cursor-left
-    map -extend W cursor-right next-word cursor-left
-    map         b begin-selection previous-word
-    map -extend B previous-word
-    map         e begin-selection next-word-end
-    map -extend E next-word-end
-    map         % history-top start-of-line begin-selection history-bottom end-of-line cursor-left
+    map -move   h   cursor-left
+    map -extend H   cursor-left
+    map -move   j   cursor-down
+    map -extend J   cursor-down
+    map -move   k   cursor-up
+    map -extend K   cursor-up
+    map -move   l   cursor-right
+    map -extend L   cursor-right
+    map         w   cursor-right begin-selection next-word cursor-left
+    map -extend W   cursor-right next-word cursor-left
+    map         b   begin-selection previous-word
+    map -extend B   previous-word
+    map         e   begin-selection next-word-end
+    map -extend E   next-word-end
+    map         %   history-top start-of-line begin-selection history-bottom end-of-line cursor-left
+    map         M-l begin-selection end-of-line cursor-left
 }
 
 addEntryPoints() {
