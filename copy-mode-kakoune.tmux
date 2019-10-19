@@ -15,113 +15,156 @@ readonly KEY_NAMES=(
     '{' '|' '}' '~'
 )
 
-declare -g CURRENT_TABLE=''
-declare -g CURRENT_TABLE_STICKY=0
+declare -g currentTable=''
+declare -g currentTableNext=''
 
 startTable() {
-    CURRENT_TABLE=''
-    CURRENT_TABLE_STICKY=0
+    currentTable=''
+    currentTableNext=''
     while [[ $# -ne 0 ]]; do
         case "$1" in
-            -sticky) CURRENT_TABLE_STICKY=1;;
-            *)       CURRENT_TABLE="$1";;
+            -next)
+                currentTableNext="$2"
+                shift
+                ;;
+            *)
+                currentTable="$1"
+                ;;
         esac
         shift
     done
+    for key_name in "${KEY_NAMES[@]}"; do
+        tmux bind-key -T"${currentTable}" "${key_name}" "switch-client -T${currentTableNext}"
+    done
+}
 
-    if [[ $CURRENT_TABLE_STICKY = 1 ]]; then
-        for key_name in "${KEY_NAMES[@]}"; do
-            tmux bind-key -T"${CURRENT_TABLE}" "${key_name}" "switch-client -T${CURRENT_TABLE}"
-        done
-    fi
+die() {
+    tmux display-message "Error! $*"
+    exit 1
 }
 
 map() {
-    local key="$1"
-    local commands="$2"
-    local stickyCommands=''
-    if [[ $CURRENT_TABLE_STICKY = 1 ]]; then
-        stickyCommands="switch-client -T${CURRENT_TABLE}"
+    local next="${currentTableNext}"
+    local key=''
+    local commands=''
+    while [[ $# -ne 0 ]]; do
+        case "$1" in
+            -next)
+                next="$2"
+                shift
+                ;;
+            -*)
+                die 'bad switch'
+                ;;
+            *)
+                if [[ -z $key ]]; then
+                    key="$1"
+                elif [[ -z $commands ]]; then
+                    commands="$1"
+                else
+                    die 'too many arguments'
+                fi
+                ;;
+        esac
+        shift
+    done
+    if [[ -z $key ]]; then
+        die 'no key given'
     fi
-    tmux bind-key -T"${CURRENT_TABLE}" "${key}" "
-        ${commands}
-        ${stickyCommands}
-    "
+    if [[ -z $commands ]]; then
+        die 'no commands given'
+    fi
+    if [[ -n $next ]]; then
+        commands="
+            ${commands}
+            switch-client -T${next}
+        "
+    fi
+    tmux bind-key -T"${currentTable}" "${key}" "${commands}"
 }
 
 addGotoMode() {
     tmux bind-key -Tcopy-mode-kakoune g '
         switch-client -Tcopy-mode-kakoune-g
     '
-    startTable copy-mode-kakoune-g
-    map Escape '
-        switch-client -Tcopy-mode-kakoune
-    '
+    startTable -next copy-mode-kakoune copy-mode-kakoune-g
     map g '
-        send-keys -X clear-selection
         send-keys -X history-top
+        send-keys -X begin-selection
     '
     map k '
-        send-keys -X clear-selection
         send-keys -X history-top
+        send-keys -X begin-selection
     '
     map l '
-        send-keys -X clear-selection
         send-keys -X end-of-line
         send-keys -X cursor-left
+        send-keys -X begin-selection
     '
     map h '
-        send-keys -X clear-selection
         send-keys -X start-of-line
+        send-keys -X begin-selection
     '
     map i '
-        send-keys -X clear-selection
         send-keys -X back-to-indentation
+        send-keys -X begin-selection
     '
     map j '
-        send-keys -X clear-selection
         send-keys -X history-bottom
         send-keys -X start-of-line
+        send-keys -X begin-selection
     '
     map e '
-        send-keys -X clear-selection
         send-keys -X history-bottom
         send-keys -X end-of-line
         send-keys -X cursor-left
+        send-keys -X begin-selection
     '
     map t '
-        send-keys -X clear-selection
         send-keys -X top-line
+        send-keys -X begin-selection
     '
     map b '
-        send-keys -X clear-selection
         send-keys -X bottom-line
+        send-keys -X begin-selection
     '
     map c '
-        send-keys -X clear-selection
         send-keys -X middle-line
+        send-keys -X begin-selection
     '
 }
 
 addNormalMode() {
-    startTable -sticky copy-mode-kakoune
-    tmux bind-key -Tcopy-mode-kakoune Escape '
+    startTable -next copy-mode-kakoune copy-mode-kakoune
+    map -next '' Escape '
         send-keys -X cancel
     '
     map h '
-        send-keys -X clear-selection
+        send-keys -X cursor-left
+        send-keys -X begin-selection
+    '
+    map H '
         send-keys -X cursor-left
     '
     map j '
-        send-keys -X clear-selection
+        send-keys -X cursor-down
+        send-keys -X begin-selection
+    '
+    map J '
         send-keys -X cursor-down
     '
     map k '
-        send-keys -X clear-selection
+        send-keys -X cursor-up
+        send-keys -X begin-selection
+    '
+    map K '
         send-keys -X cursor-up
     '
     map l '
-        send-keys -X clear-selection
+        send-keys -X cursor-right
+        send-keys -X begin-selection
+    '
+    map L '
         send-keys -X cursor-right
     '
 }
