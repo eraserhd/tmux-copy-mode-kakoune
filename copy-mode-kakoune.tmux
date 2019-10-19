@@ -49,6 +49,8 @@ addNormalMode() {
     map -extend K cursor-up
     map -move   l cursor-right
     map -extend L cursor-right
+    map         w cursor-right begin-selection next-word cursor-left
+    map -extend W cursor-right next-word cursor-left
 }
 
 addEntryPoints() {
