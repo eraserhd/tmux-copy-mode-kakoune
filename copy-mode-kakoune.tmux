@@ -91,28 +91,33 @@ map() {
     tmux bind-key -T"${currentTable}" "${key}" "${commands}"
 }
 
+addGotoModeKeys() {
+    local moveOrExtend="$1"
+    map $moveOrExtend g history-top
+    map $moveOrExtend G history-top
+    map $moveOrExtend k history-top
+    map $moveOrExtend K history-top
+    map $moveOrExtend l end-of-line cursor-left
+    map $moveOrExtend L end-of-line cursor-left
+    map $moveOrExtend h start-of-line
+    map $moveOrExtend H start-of-line
+    map $moveOrExtend i back-to-indentation
+    map $moveOrExtend I back-to-indentation
+    map $moveOrExtend j history-bottom start-of-line
+    map $moveOrExtend J history-bottom start-of-line
+    map $moveOrExtend e history-bottom end-of-line cursor-left
+    map $moveOrExtend E history-bottom end-of-line cursor-left
+    map $moveOrExtend t top-line
+    map $moveOrExtend T top-line
+    map $moveOrExtend b bottom-line
+    map $moveOrExtend B bottom-line
+    map $moveOrExtend c middle-line
+    map $moveOrExtend C middle-line
+}
+
 addGotoMode() {
     table -next copy-mode-kakoune copy-mode-kakoune-goto
-    map -move g history-top
-    map -move G history-top
-    map -move k history-top
-    map -move K history-top
-    map -move l end-of-line cursor-left
-    map -move L end-of-line cursor-left
-    map -move h start-of-line
-    map -move H start-of-line
-    map -move i back-to-indentation
-    map -move I back-to-indentation
-    map -move j history-bottom start-of-line
-    map -move J history-bottom start-of-line
-    map -move e history-bottom end-of-line cursor-left
-    map -move E history-bottom end-of-line cursor-left
-    map -move t top-line
-    map -move T top-line
-    map -move b bottom-line
-    map -move B bottom-line
-    map -move c middle-line
-    map -move C middle-line
+    addGotoModeKeys -move
 }
 
 addNormalMode() {
