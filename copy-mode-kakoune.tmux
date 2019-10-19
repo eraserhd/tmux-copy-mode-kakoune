@@ -100,15 +100,25 @@ addGotoMode() {
     '
     table -next copy-mode-kakoune copy-mode-kakoune-g
     map -move g history-top
+    map -move G history-top
     map -move k history-top
+    map -move K history-top
     map -move l end-of-line cursor-left
+    map -move L end-of-line cursor-left
     map -move h start-of-line
+    map -move H start-of-line
     map -move i back-to-indentation
+    map -move I back-to-indentation
     map -move j history-bottom start-of-line
+    map -move J history-bottom start-of-line
     map -move e history-bottom end-of-line cursor-left
+    map -move E history-bottom end-of-line cursor-left
     map -move t top-line
+    map -move T top-line
     map -move b bottom-line
+    map -move B bottom-line
     map -move c middle-line
+    map -move C middle-line
 }
 
 addNormalMode() {
