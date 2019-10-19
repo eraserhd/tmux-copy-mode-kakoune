@@ -56,7 +56,10 @@ addNormalMode() {
     map         e   begin-selection next-word-end
     map -extend E   next-word-end
     map         %   history-top start-of-line begin-selection history-bottom end-of-line cursor-left
+    map         M-h begin-selection start-of-line
+    map -extend M-H start-of-line
     map         M-l begin-selection end-of-line cursor-left
+    map -extend M-L end-of-line cursor-left
 }
 
 addEntryPoints() {
