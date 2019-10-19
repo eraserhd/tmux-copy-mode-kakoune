@@ -18,7 +18,7 @@ readonly KEY_NAMES=(
 declare -g currentTable=''
 declare -g currentTableNext=''
 
-startTable() {
+table() {
     currentTable=''
     currentTableNext=''
     while [[ $# -ne 0 ]]; do
@@ -99,7 +99,7 @@ addGotoMode() {
     tmux bind-key -Tcopy-mode-kakoune g '
         switch-client -Tcopy-mode-kakoune-g
     '
-    startTable -next copy-mode-kakoune copy-mode-kakoune-g
+    table -next copy-mode-kakoune copy-mode-kakoune-g
     map -move g '
         send-keys -X history-top
     '
@@ -137,7 +137,7 @@ addGotoMode() {
 }
 
 addNormalMode() {
-    startTable -next copy-mode-kakoune copy-mode-kakoune
+    table -next copy-mode-kakoune copy-mode-kakoune
     map -next '' Escape '
         send-keys -X cancel
     '
