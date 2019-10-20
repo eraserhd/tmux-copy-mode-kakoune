@@ -68,6 +68,7 @@ addNormalMode() {
     map -move   C-d      halfpage-down
     map         '\;'     clear-selection
     map         'M-\;'   other-end
+    map         y        copy-selection-no-clear
 }
 
 addEntryPoints() {
