@@ -43,12 +43,20 @@ addNormalMode() {
     map -next copy-mode-kakoune-goto-extend G
     map -move   h        cursor-left
     map -extend H        cursor-left
+    map -move   Left     cursor-left
+    map -extend S-Left   cursor-left
     map -move   j        cursor-down
     map -extend J        cursor-down
+    map -move   Down     cursor-down
+    map -extend S-Down   cursor-down
     map -move   k        cursor-up
     map -extend K        cursor-up
+    map -move   Up       cursor-up
+    map -extend S-Up     cursor-up
     map -move   l        cursor-right
     map -extend L        cursor-right
+    map -move   Right    cursor-right
+    map -extend S-Right  cursor-right
     map         w        cursor-right begin-selection next-word cursor-left
     map -extend W        cursor-right next-word cursor-left
     map         b        begin-selection previous-word
