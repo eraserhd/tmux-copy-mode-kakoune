@@ -8,6 +8,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+static const char* KEY_NAMES[] = {
+        "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11",
+        "F12", "IC", "Insert", "DC", "Delete", "Home", "End", "NPage",
+        "PageDown", "PgDn", "PPage", "PageUp", "PgUp", "Tab", "BTab", "Space",
+        "BSpace", "Enter", "Escape", "Up", "Down", "Left", "Right", "KP/",
+        "KP*", "KP-", "KP7", "KP8", "KP9", "KP+", "KP4", "KP5", "KP6", "KP1",
+        "KP2", "KP3", "KPEnter", "KP0", "KP.",
+        "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", "-", ".", "/",
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+        ":", ";", "<", "=", ">", "?", "@",
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+        "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+        "[", "\\", "]", "^", "_", "`",
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
+        "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+        "{", "|", "}", "~"
+};
+
 typedef struct input_record_tag {
         char *move_mode;
         char *extend_mode;
@@ -91,6 +109,26 @@ input_record_t parse_input_record(char *line)
         return result;
 }
 
+void clear_mode(const char* mode, const char* next_mode)
+{
+        for (int i = 0; i < sizeof(KEY_NAMES)/sizeof(KEY_NAMES[0]); i++) {
+                char *quoted_key = tmux_quote(KEY_NAMES[i]);
+                printf("bind-key -Tcopy-mode-kakoune-%s %s 'switch-client -Tcopy-mode-kakoune-%s'\n",
+                        mode, quoted_key, next_mode);
+                free(quoted_key);
+        }
+}
+
+void clear_table(const input_record_t* header)
+{
+        if (!header->next_mode || !strcmp(header->next_mode, "none"))
+                return;
+        clear_mode(header->move_mode, header->next_mode);
+        if (!header->extend_mode || !strcmp(header->move_mode, header->extend_mode))
+                return;
+        clear_mode(header->extend_mode, header->next_mode);
+}
+
 void make_mapping(const input_record_t* record, const char* mode, const char* key, bool skip_begin_selection)
 {
         char *quoted_key = tmux_quote(key);
@@ -140,13 +178,16 @@ int main(int argc, char *argv[])
                         continue;
 
                 record = parse_input_record(line);
-                if (!record.move_keys[0] && !record.extend_keys[0])
+                if (!record.move_keys[0] && !record.extend_keys[0]) {
                         header = record;
-                else {
+                        clear_table(&header);
+                } else {
                         if (!record.next_mode)
                                 record.next_mode = header.next_mode;
                         if (!record.extend_mode)
                                 record.extend_mode = header.extend_mode;
+                        if (!record.extend_mode)
+                                record.extend_mode = record.move_mode;
                         make_mappings(&record);
                 }
         }
