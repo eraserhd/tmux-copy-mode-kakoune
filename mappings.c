@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +15,30 @@ typedef struct input_record_tag {
         char *extend_keys[64];
         char *actions[64];
 } input_record_t;
+
+char *tmux_quote(const char* s)
+{
+        char *result = (char*)malloc(3 + strlen(s)*5);
+        char *p = result;
+        *p++ = '\'';
+        for (; *s; s++) {
+                switch (*s) {
+                case '\'':
+                        *p++ = '\'';
+                        *p++ = '"';
+                        *p++ = '\'';
+                        *p++ = '"';
+                        *p++ = '\'';
+                        break;
+                default:
+                        *p++ = *s;
+                        break;
+                }
+        }
+        *p++ = '\'';
+        *p++ = '\0';
+        return result;
+}
 
 void tokenize_keys(char *keys, char *output[64])
 {
@@ -68,11 +93,13 @@ input_record_t parse_input_record(char *line)
 void make_mappings(const input_record_t* record)
 {
         for (int i = 0; record->move_keys[i]; i++) {
-                printf("bind -Tcopy-mode-kakoune-%s %s '\n", record->mode, record->move_keys[i]);
+                char *quoted_key = tmux_quote(record->move_keys[i]);
+                printf("bind-key -Tcopy-mode-kakoune-%s %s '\\\n", record->mode, quoted_key);
+                free(quoted_key);
                 for (int j = 0; record->actions[j]; j++)
-                        printf("    send-keys -X %s\n", record->actions[j]);
+                        printf("    send-keys -X %s ;\\\n", record->actions[j]);
                 if (strcmp(record->next_mode, "none"))
-                        printf("    switch-client -Tcopy-mode-kakoune-%s\n", record->next_mode);
+                        printf("    switch-client -Tcopy-mode-kakoune-%s ;\\\n", record->next_mode);
                 printf("'\n");
         }
 }
