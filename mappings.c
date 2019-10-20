@@ -113,7 +113,7 @@ void clear_mode(const char* mode, const char* next_mode)
 {
         for (int i = 0; i < sizeof(KEY_NAMES)/sizeof(KEY_NAMES[0]); i++) {
                 char *quoted_key = tmux_quote(KEY_NAMES[i]);
-                printf("bind-key -Tcopy-mode-kakoune-%s %s 'switch-client -Tcopy-mode-kakoune-%s'\n",
+                printf("bind-key -Tcopy-mode-kakoune-%s %s switch-client -Tcopy-mode-kakoune-%s\n",
                         mode, quoted_key, next_mode);
                 free(quoted_key);
         }
