@@ -9,7 +9,6 @@ normal h,Left       H,S-Left  cursor-left begin-selection
 normal j,Down       J,S-Down  cursor-down begin-selection
 normal k,Up         K,S-Up    cursor-up begin-selection
 normal l,Right      L,S-Right cursor-right begin-selection
-normal Right        S-Right   cursor-right begin-selection
 normal w            W         cursor-right begin-selection next-word cursor-left
 normal b            B         begin-selection previous-word
 normal e            E         begin-selection next-word-end

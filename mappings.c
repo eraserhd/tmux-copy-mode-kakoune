@@ -3,14 +3,15 @@
 #include <assert.h>
 #include <ctype.h>
 #include <malloc.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 typedef struct input_record_tag {
-        char *mode;
-        char *next_mode;
+        char *move_mode;
         char *extend_mode;
+        char *next_mode;
         char *move_keys[64];
         char *extend_keys[64];
         char *actions[64];
@@ -63,8 +64,8 @@ input_record_t parse_input_record(char *line)
         struct input_record_tag result = {0};
 
         char *saveptr;
-        result.mode = strtok_r(line, " \t\v", &saveptr);
-        assert(result.mode);
+        result.move_mode = strtok_r(line, " \t\v", &saveptr);
+        assert(result.move_mode);
 
         char *move_keys = strtok_r(NULL, " \t\v", &saveptr);
         assert(move_keys);
@@ -90,18 +91,30 @@ input_record_t parse_input_record(char *line)
         return result;
 }
 
+void make_mapping(const input_record_t* record, const char* mode, const char* key, bool skip_begin_selection)
+{
+        char *quoted_key = tmux_quote(key);
+        printf("bind-key -Tcopy-mode-kakoune-%s %s '\\\n", mode, quoted_key);
+        free(quoted_key);
+
+        for (int j = 0; record->actions[j]; j++) {
+                if (skip_begin_selection && !strcmp(record->actions[j], "begin-selection"))
+                        continue;
+                printf("    send-keys -X %s ;\\\n", record->actions[j]);
+        }
+
+        if (strcmp(record->next_mode, "none"))
+                printf("    switch-client -Tcopy-mode-kakoune-%s ;\\\n", record->next_mode);
+
+        printf("'\n");
+}
+
 void make_mappings(const input_record_t* record)
 {
-        for (int i = 0; record->move_keys[i]; i++) {
-                char *quoted_key = tmux_quote(record->move_keys[i]);
-                printf("bind-key -Tcopy-mode-kakoune-%s %s '\\\n", record->mode, quoted_key);
-                free(quoted_key);
-                for (int j = 0; record->actions[j]; j++)
-                        printf("    send-keys -X %s ;\\\n", record->actions[j]);
-                if (strcmp(record->next_mode, "none"))
-                        printf("    switch-client -Tcopy-mode-kakoune-%s ;\\\n", record->next_mode);
-                printf("'\n");
-        }
+        for (int i = 0; record->move_keys[i]; i++)
+                make_mapping(record, record->move_mode, record->move_keys[i], false);
+        for (int i = 0; record->extend_keys[i]; i++)
+                make_mapping(record, record->extend_mode, record->extend_keys[i], true);
 }
 
 int main(int argc, char *argv[])
