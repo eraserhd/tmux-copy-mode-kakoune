@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 600
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -34,24 +36,21 @@ void tokenize_keys(char *keys, char *output[64])
 input_record_t parse_input_record(char *line)
 {
         struct input_record_tag result = {0};
-        char *move_keys;
-        char *extend_keys;
-        char *action;
-        char *saveptr;
-        int i;
 
+        char *saveptr;
         result.mode = strtok_r(line, " \t\v", &saveptr);
         assert(result.mode);
 
-        move_keys = strtok_r(NULL, " \t\v", &saveptr);
+        char *move_keys = strtok_r(NULL, " \t\v", &saveptr);
         assert(move_keys);
         tokenize_keys(move_keys, result.move_keys);
 
-        extend_keys = strtok_r(NULL, " \t\v", &saveptr);
+        char *extend_keys = strtok_r(NULL, " \t\v", &saveptr);
         assert(extend_keys);
         tokenize_keys(extend_keys, result.extend_keys);
 
-        i = 0;
+        int i = 0;
+        char *action;
         while (action = strtok_r(NULL, " \t\v", &saveptr)) {
                 if (!strncmp(action, "->", 2))
                         result.next_mode = action+2;
@@ -68,12 +67,10 @@ input_record_t parse_input_record(char *line)
 
 void make_mappings(const input_record_t* record)
 {
-        int i, j;
-        for (i = 0; record->move_keys[i]; i++) {
+        for (int i = 0; record->move_keys[i]; i++) {
                 printf("bind -Tcopy-mode-kakoune-%s %s '\n", record->mode, record->move_keys[i]);
-                for (j = 0; record->actions[j]; j++) {
+                for (int j = 0; record->actions[j]; j++)
                         printf("    send-keys -X %s\n", record->actions[j]);
-                }
                 if (strcmp(record->next_mode, "none"))
                         printf("    switch-client -Tcopy-mode-kakoune-%s\n", record->next_mode);
                 printf("'\n");
@@ -83,17 +80,17 @@ void make_mappings(const input_record_t* record)
 int main(int argc, char *argv[])
 {
         static char file[64 * 1024];
-        char *line, *line_saveptr;
-        int result;
-        input_record_t header;
-
-        result = fread(file, 1, sizeof(file), stdin);
+        int result = fread(file, 1, sizeof(file), stdin);
         assert(result > 0);
         assert(result != sizeof(file)); /* Buffer too small */
         file[result] = '\0';
 
+        char *line_saveptr;
         (void)strtok_r(file, "\r\n", &line_saveptr);
         (void)strtok_r(NULL, "\r\n", &line_saveptr);
+
+        char *line;
+        input_record_t header = {0};
         while (line = strtok_r(NULL, "\r\n", &line_saveptr)) {
                 input_record_t record;
 
