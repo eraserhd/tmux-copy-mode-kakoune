@@ -82,10 +82,12 @@ addNormalMode() {
 addEntryPoints() {
     tmux bind-key -Tprefix '[' '
         copy-mode
+        send-keys -X begin-selection
         switch-client -Tcopy-mode-kakoune
     '
     tmux bind-key -Tctrlw N '
         copy-mode
+        send-keys -X begin-selection
         switch-client -Tcopy-mode-kakoune
     '
 }
