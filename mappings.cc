@@ -6,6 +6,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 
 static const char* KEY_NAMES[] = {
@@ -31,21 +32,21 @@ struct input_record_t
     char *move_mode;
     char *extend_mode;
     char *next_mode;
-    char *move_keys[64];
-    char *extend_keys[64];
+    std::vector<std::string> move_keys;
+    std::vector<std::string> extend_keys;
     std::vector<std::string> actions;
 };
 
-std::string tmux_quote(const char* s)
+std::string tmux_quote(std::string const& s)
 {
     std::string result = "\'";
-    for (; *s; s++) {
-        switch (*s) {
+    for (char ch : s) {
+        switch (ch) {
         case '\'':
             result += "'\"'\"'";
             break;
         default:
-            result += *s;
+            result += ch;
             break;
         }
     }
@@ -53,21 +54,19 @@ std::string tmux_quote(const char* s)
     return result;
 }
 
-void tokenize_keys(char *keys, char *output[64])
+std::vector<std::string> tokenize_keys(std::string const& keys)
 {
-    int i = 0;
-    if (!strcmp(keys, ","))
-        output[i++] = keys;
-    else if (!strcmp(keys, "--"))
-        ;
+    if (keys == ",")
+        return {","};
+    else if (keys == "--")
+        return {};
     else {
-        char *saveptr;
-        char *key = strtok_r(keys, ",", &saveptr);
-        while (key) {
-            output[i++] = key;
-            key = strtok_r(NULL, ",", &saveptr);
-            assert(i < 63);
-        }
+        std::vector<std::string> result;
+        std::istringstream in(keys);
+        std::string token;
+        while (std::getline(in, token, ','))
+            result.emplace_back(std::move(token));
+        return result;
     }
 }
 
@@ -81,11 +80,11 @@ input_record_t parse_input_record(char *line)
 
     char *move_keys = strtok_r(NULL, " \t\v", &saveptr);
     assert(move_keys);
-    tokenize_keys(move_keys, result.move_keys);
+    result.move_keys = tokenize_keys(move_keys);
 
     char *extend_keys = strtok_r(NULL, " \t\v", &saveptr);
     assert(extend_keys);
-    tokenize_keys(extend_keys, result.extend_keys);
+    result.extend_keys = tokenize_keys(extend_keys);
 
     char *action;
     while (action = strtok_r(NULL, " \t\v", &saveptr)) {
@@ -139,7 +138,7 @@ void clear_table(const input_record_t* header)
     clear_mode(header->extend_mode, header->next_mode);
 }
 
-void make_mapping(const input_record_t* record, const char* mode, const char* key, bool skip_begin_selection)
+void make_mapping(const input_record_t* record, const char* mode, std::string const& key, bool skip_begin_selection)
 {
     std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " " << tmux_quote(key) << " '\\\n";
 
@@ -157,10 +156,10 @@ void make_mapping(const input_record_t* record, const char* mode, const char* ke
 
 void make_mappings(const input_record_t* record)
 {
-    for (int i = 0; record->move_keys[i]; i++)
-        make_mapping(record, record->move_mode, record->move_keys[i], false);
-    for (int i = 0; record->extend_keys[i]; i++)
-        make_mapping(record, record->extend_mode, record->extend_keys[i], true);
+    for (auto const& key : record->move_keys)
+        make_mapping(record, record->move_mode, key, false);
+    for (auto const& key : record->extend_keys)
+        make_mapping(record, record->extend_mode, key, true);
 }
 
 int main(int argc, char *argv[])
@@ -186,7 +185,7 @@ int main(int argc, char *argv[])
             continue;
 
         record = parse_input_record(line);
-        if (!record.move_keys[0] && !record.extend_keys[0]) {
+        if (record.move_keys.empty() && record.extend_keys.empty()) {
             header = record;
             clear_table(&header);
         } else {
@@ -200,5 +199,5 @@ int main(int argc, char *argv[])
         }
     }
 
-    exit(EXIT_SUCCESS);
+    return 0;
 }
