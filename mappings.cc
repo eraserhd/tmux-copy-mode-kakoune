@@ -1,12 +1,11 @@
 #define _XOPEN_SOURCE 600
 
-#include <assert.h>
-#include <ctype.h>
-#include <malloc.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
 
 static const char* KEY_NAMES[] = {
         "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11",
@@ -35,7 +34,7 @@ typedef struct input_record_tag {
         char *actions[64];
 } input_record_t;
 
-char *tmux_quote(const char* s)
+std::string tmux_quote(const char* s)
 {
         char *result = (char*)malloc(3 + strlen(s)*5);
         char *p = result;
@@ -111,11 +110,30 @@ input_record_t parse_input_record(char *line)
 
 void clear_mode(const char* mode, const char* next_mode)
 {
-        for (int i = 0; i < sizeof(KEY_NAMES)/sizeof(KEY_NAMES[0]); i++) {
-                char *quoted_key = tmux_quote(KEY_NAMES[i]);
-                printf("bind-key -Tcopy-mode-kakoune-%s %s switch-client -Tcopy-mode-kakoune-%s\n",
-                        mode, quoted_key, next_mode);
-                free(quoted_key);
+        char keyname[64];
+
+        for (int modifiers = 0; modifiers < 8; modifiers++) {
+                for (int i = 0; i < sizeof(KEY_NAMES)/sizeof(KEY_NAMES[0]); i++) {
+                        if (strlen(KEY_NAMES[i]) == 1) {
+                                /* ASCII names */
+                                if (modifiers & 1)
+                                        continue; /* Shifted version has own key name. */
+                                if (isupper(KEY_NAMES[i][0] && (modifiers & 2)))
+                                        continue; /* C-x not different from C-X */
+                        }
+
+                        keyname[0] = '\0';
+                        if (modifiers & 1)
+                                strcat(keyname, "S-");
+                        if (modifiers & 2)
+                                strcat(keyname, "C-");
+                        if (modifiers & 4)
+                                strcat(keyname, "M-");
+                        strcat(keyname, KEY_NAMES[i]);
+                        auto quoted_key = tmux_quote(keyname);
+                        printf("bind-key -Tcopy-mode-kakoune-%s %s switch-client -Tcopy-mode-kakoune-%s\n",
+                                mode, quoted_key.c_str(), next_mode);
+                }
         }
 }
 
@@ -131,9 +149,8 @@ void clear_table(const input_record_t* header)
 
 void make_mapping(const input_record_t* record, const char* mode, const char* key, bool skip_begin_selection)
 {
-        char *quoted_key = tmux_quote(key);
-        printf("bind-key -Tcopy-mode-kakoune-%s %s '\\\n", mode, quoted_key);
-        free(quoted_key);
+        auto quoted_key = tmux_quote(key);
+        printf("bind-key -Tcopy-mode-kakoune-%s %s '\\\n", mode, quoted_key.c_str());
 
         for (int j = 0; record->actions[j]; j++) {
                 if (skip_begin_selection && !strcmp(record->actions[j], "begin-selection"))
