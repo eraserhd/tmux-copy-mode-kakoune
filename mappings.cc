@@ -74,6 +74,21 @@ struct InputRecord
     std::vector<std::string> move_keys;
     std::vector<std::string> extend_keys;
     std::vector<std::string> actions;
+
+    bool is_header() const
+    {
+        return move_keys.empty() && extend_keys.empty();
+    }
+
+    void merge_header(InputRecord const& header)
+    {
+        if (next_mode.empty())
+            next_mode = header.next_mode;
+        if (extend_mode.empty())
+            extend_mode = header.extend_mode;
+        if (extend_mode.empty())
+            extend_mode = move_mode;
+    }
 };
 
 std::string tmux_quote(std::string const& s)
@@ -187,16 +202,11 @@ int main(int argc, char *argv[])
             continue;
 
         InputRecord record = parse_input_record(line);
-        if (record.move_keys.empty() && record.extend_keys.empty()) {
+        if (record.is_header()) {
             header = record;
             clear_table(header);
         } else {
-            if (record.next_mode.empty())
-                record.next_mode = header.next_mode;
-            if (record.extend_mode.empty())
-                record.extend_mode = header.extend_mode;
-            if (record.extend_mode.empty())
-                record.extend_mode = record.move_mode;
+            record.merge_header(header);
             make_mappings(record);
         }
     }
