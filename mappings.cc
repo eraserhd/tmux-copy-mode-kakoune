@@ -91,6 +91,7 @@ InputRecord parse_input_record(std::string const& line)
 
 void clear_mode(std::string const& mode, std::string const& next_mode)
 {
+    static const std::string NO_CONTROL = "\"$%&*/`{|}~";
     for (int modifiers = 0; modifiers < 8; modifiers++) {
         for (auto const& name : KEY_NAMES) {
             if (name.size() == 1) {
@@ -99,7 +100,12 @@ void clear_mode(std::string const& mode, std::string const& next_mode)
                     continue; // Shifted version has own key name.
                 if (isupper(name[0] && (modifiers & 2)))
                     continue; // C-x not different from C-X
+                if (NO_CONTROL.find(name[0]) != std::string::npos && (modifiers & 2))
+                    continue;
             }
+
+            if (name == "Escape" && modifiers)
+                continue;
 
             std::string keyname;
             if (modifiers & 1)
