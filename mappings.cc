@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cctype>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -26,14 +25,15 @@ static const char* KEY_NAMES[] = {
         "{", "|", "}", "~"
 };
 
-typedef struct input_record_tag {
-        char *move_mode;
-        char *extend_mode;
-        char *next_mode;
-        char *move_keys[64];
-        char *extend_keys[64];
-        char *actions[64];
-} input_record_t;
+struct input_record_t
+{
+    char *move_mode;
+    char *extend_mode;
+    char *next_mode;
+    char *move_keys[64];
+    char *extend_keys[64];
+    char *actions[64];
+};
 
 std::string tmux_quote(const char* s)
 {
@@ -54,154 +54,153 @@ std::string tmux_quote(const char* s)
 
 void tokenize_keys(char *keys, char *output[64])
 {
-        int i = 0;
-        if (!strcmp(keys, ","))
-                output[i++] = keys;
-        else if (!strcmp(keys, "--"))
-                ;
-        else {
-                char *saveptr;
-                char *key = strtok_r(keys, ",", &saveptr);
-                while (key) {
-                        output[i++] = key;
-                        key = strtok_r(NULL, ",", &saveptr);
-                        assert(i < 63);
-                }
+    int i = 0;
+    if (!strcmp(keys, ","))
+        output[i++] = keys;
+    else if (!strcmp(keys, "--"))
+        ;
+    else {
+        char *saveptr;
+        char *key = strtok_r(keys, ",", &saveptr);
+        while (key) {
+            output[i++] = key;
+            key = strtok_r(NULL, ",", &saveptr);
+            assert(i < 63);
         }
+    }
 }
 
 input_record_t parse_input_record(char *line)
 {
-        struct input_record_tag result = {0};
+    input_record_t result = {0};
 
-        char *saveptr;
-        result.move_mode = strtok_r(line, " \t\v", &saveptr);
-        assert(result.move_mode);
+    char *saveptr;
+    result.move_mode = strtok_r(line, " \t\v", &saveptr);
+    assert(result.move_mode);
 
-        char *move_keys = strtok_r(NULL, " \t\v", &saveptr);
-        assert(move_keys);
-        tokenize_keys(move_keys, result.move_keys);
+    char *move_keys = strtok_r(NULL, " \t\v", &saveptr);
+    assert(move_keys);
+    tokenize_keys(move_keys, result.move_keys);
 
-        char *extend_keys = strtok_r(NULL, " \t\v", &saveptr);
-        assert(extend_keys);
-        tokenize_keys(extend_keys, result.extend_keys);
+    char *extend_keys = strtok_r(NULL, " \t\v", &saveptr);
+    assert(extend_keys);
+    tokenize_keys(extend_keys, result.extend_keys);
 
-        int i = 0;
-        char *action;
-        while (action = strtok_r(NULL, " \t\v", &saveptr)) {
-                if (!strncmp(action, "->", 2))
-                        result.next_mode = action+2;
-                else if (!strncmp(action, "extend-mode=", strlen("extend-mode=")))
-                        result.extend_mode = action+strlen("extend-mode=");
-                else {
-                        result.actions[i++] = action;
-                        assert(i < 64);
-                }
+    int i = 0;
+    char *action;
+    while (action = strtok_r(NULL, " \t\v", &saveptr)) {
+        if (!strncmp(action, "->", 2))
+            result.next_mode = action+2;
+        else if (!strncmp(action, "extend-mode=", strlen("extend-mode=")))
+            result.extend_mode = action+strlen("extend-mode=");
+        else {
+            result.actions[i++] = action;
+            assert(i < 64);
         }
+    }
 
-        return result;
+    return result;
 }
 
 void clear_mode(const char* mode, const char* next_mode)
 {
-        char keyname[64];
+    char keyname[64];
 
-        for (int modifiers = 0; modifiers < 8; modifiers++) {
-                for (int i = 0; i < sizeof(KEY_NAMES)/sizeof(KEY_NAMES[0]); i++) {
-                        if (strlen(KEY_NAMES[i]) == 1) {
-                                /* ASCII names */
-                                if (modifiers & 1)
-                                        continue; /* Shifted version has own key name. */
-                                if (isupper(KEY_NAMES[i][0] && (modifiers & 2)))
-                                        continue; /* C-x not different from C-X */
-                        }
+    for (int modifiers = 0; modifiers < 8; modifiers++) {
+        for (int i = 0; i < sizeof(KEY_NAMES)/sizeof(KEY_NAMES[0]); i++) {
+            if (strlen(KEY_NAMES[i]) == 1) {
+                /* ASCII names */
+                if (modifiers & 1)
+                    continue; /* Shifted version has own key name. */
+                if (isupper(KEY_NAMES[i][0] && (modifiers & 2)))
+                    continue; /* C-x not different from C-X */
+            }
 
-                        keyname[0] = '\0';
-                        if (modifiers & 1)
-                                strcat(keyname, "S-");
-                        if (modifiers & 2)
-                                strcat(keyname, "C-");
-                        if (modifiers & 4)
-                                strcat(keyname, "M-");
-                        strcat(keyname, KEY_NAMES[i]);
-                        std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " "
-                            << tmux_quote(keyname) << " switch-client -Tcopy-mode-kakoune-"
-                            << next_mode << std::endl;
-                }
+            keyname[0] = '\0';
+            if (modifiers & 1)
+                strcat(keyname, "S-");
+            if (modifiers & 2)
+                strcat(keyname, "C-");
+            if (modifiers & 4)
+                strcat(keyname, "M-");
+            strcat(keyname, KEY_NAMES[i]);
+            std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " "
+                << tmux_quote(keyname) << " switch-client -Tcopy-mode-kakoune-"
+                << next_mode << std::endl;
         }
+    }
 }
 
 void clear_table(const input_record_t* header)
 {
-        if (!header->next_mode || !strcmp(header->next_mode, "none"))
-                return;
-        clear_mode(header->move_mode, header->next_mode);
-        if (!header->extend_mode || !strcmp(header->move_mode, header->extend_mode))
-                return;
-        clear_mode(header->extend_mode, header->next_mode);
+    if (!header->next_mode || !strcmp(header->next_mode, "none"))
+        return;
+    clear_mode(header->move_mode, header->next_mode);
+    if (!header->extend_mode || !strcmp(header->move_mode, header->extend_mode))
+        return;
+    clear_mode(header->extend_mode, header->next_mode);
 }
 
 void make_mapping(const input_record_t* record, const char* mode, const char* key, bool skip_begin_selection)
 {
-        auto quoted_key = tmux_quote(key);
-        printf("bind-key -Tcopy-mode-kakoune-%s %s '\\\n", mode, quoted_key.c_str());
+    std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " " << tmux_quote(key) << " '\\\n";
 
-        for (int j = 0; record->actions[j]; j++) {
-                if (skip_begin_selection && !strcmp(record->actions[j], "begin-selection"))
-                        continue;
-                printf("    send-keys -X %s ;\\\n", record->actions[j]);
-        }
+    for (int j = 0; record->actions[j]; j++) {
+        if (skip_begin_selection && !strcmp(record->actions[j], "begin-selection"))
+            continue;
+        std::cout << "    send-keys -X " << record->actions[j] << " ;\\\n";
+    }
 
-        if (strcmp(record->next_mode, "none"))
-                printf("    switch-client -Tcopy-mode-kakoune-%s ;\\\n", record->next_mode);
+    if (strcmp(record->next_mode, "none"))
+        std::cout << "    switch-client -Tcopy-mode-kakoune-" << record->next_mode << " ;\\\n";
 
-        printf("'\n");
+    std::cout << "'\n";
 }
 
 void make_mappings(const input_record_t* record)
 {
-        for (int i = 0; record->move_keys[i]; i++)
-                make_mapping(record, record->move_mode, record->move_keys[i], false);
-        for (int i = 0; record->extend_keys[i]; i++)
-                make_mapping(record, record->extend_mode, record->extend_keys[i], true);
+    for (int i = 0; record->move_keys[i]; i++)
+        make_mapping(record, record->move_mode, record->move_keys[i], false);
+    for (int i = 0; record->extend_keys[i]; i++)
+        make_mapping(record, record->extend_mode, record->extend_keys[i], true);
 }
 
 int main(int argc, char *argv[])
 {
-        static char file[64 * 1024];
-        int result = fread(file, 1, sizeof(file), stdin);
-        assert(result > 0);
-        assert(result != sizeof(file)); /* Buffer too small */
-        file[result] = '\0';
+    static char file[64 * 1024];
+    int result = fread(file, 1, sizeof(file), stdin);
+    assert(result > 0);
+    assert(result != sizeof(file)); /* Buffer too small */
+    file[result] = '\0';
 
-        char *line_saveptr;
-        (void)strtok_r(file, "\r\n", &line_saveptr);
-        (void)strtok_r(NULL, "\r\n", &line_saveptr);
+    char *line_saveptr;
+    (void)strtok_r(file, "\r\n", &line_saveptr);
+    (void)strtok_r(NULL, "\r\n", &line_saveptr);
 
-        char *line;
-        input_record_t header = {0};
-        while (line = strtok_r(NULL, "\r\n", &line_saveptr)) {
-                input_record_t record;
+    char *line;
+    input_record_t header = {0};
+    while (line = strtok_r(NULL, "\r\n", &line_saveptr)) {
+        input_record_t record;
 
-                if (line[0] == '<')
-                        continue;
-                if (isspace(line[0]))
-                        continue;
+        if (line[0] == '<')
+            continue;
+        if (isspace(line[0]))
+            continue;
 
-                record = parse_input_record(line);
-                if (!record.move_keys[0] && !record.extend_keys[0]) {
-                        header = record;
-                        clear_table(&header);
-                } else {
-                        if (!record.next_mode)
-                                record.next_mode = header.next_mode;
-                        if (!record.extend_mode)
-                                record.extend_mode = header.extend_mode;
-                        if (!record.extend_mode)
-                                record.extend_mode = record.move_mode;
-                        make_mappings(&record);
-                }
+        record = parse_input_record(line);
+        if (!record.move_keys[0] && !record.extend_keys[0]) {
+            header = record;
+            clear_table(&header);
+        } else {
+            if (!record.next_mode)
+                record.next_mode = header.next_mode;
+            if (!record.extend_mode)
+                record.extend_mode = header.extend_mode;
+            if (!record.extend_mode)
+                record.extend_mode = record.move_mode;
+            make_mappings(&record);
         }
+    }
 
-        exit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }
