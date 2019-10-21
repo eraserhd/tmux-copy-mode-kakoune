@@ -1,6 +1,6 @@
 Mode   Move         Extend<1> Actions
 ------ ------------ --------- ---------------------------------------------------------------------------------
-normal --           --        ->normal
+normal --           --        ->none
 normal Escape       --        cancel ->none
 normal g            --        ->goto
 normal G            --        ->goto-extend
@@ -22,7 +22,7 @@ normal C-d          --        halfpage-down begin-selection
 normal ;            --        clear-selection
 normal M-;          --        other-end
 normal y            --        copy-selection-no-clear
-goto   --           --        ->normal extend-mode=goto-extend
+goto   --           --        ->none extend-mode=goto-extend
 goto   g,G,k,K      g,G,k,K   history-top begin-selection
 goto   l,L          l,L       end-of-line cursor-left begin-selection
 goto   h,H          h,H       start-of-line begin-selection
@@ -32,7 +32,7 @@ goto   e,E          e,E       history-bottom end-of-line cursor-left begin-selec
 goto   t,T          t,T       top-line begin-selection
 goto   b,B          b,B       bottom-line begin-selection
 goto   c,C          c,C       middle-line begin-selection
-user   --           --        ->normal
+user   --           --        ->none
 user   y            --        copy-selection-no-clear
 
 <1> Extend versions are identical to move versions, except begin-selection is omitted.

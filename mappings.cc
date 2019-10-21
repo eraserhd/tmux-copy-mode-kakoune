@@ -20,6 +20,13 @@ std::string tmux_quote(std::string const& s)
     return result;
 }
 
+std::string table_name(std::string const& s)
+{
+    if (s == "normal")
+        return "copy-mode-vi";
+    return "copy-mode-kakoune-" + s;
+}
+
 struct InputRecord
 {
     std::string move_mode;
@@ -87,25 +94,9 @@ private:
     }
 };
 
-void clear_mode(std::string const& mode, std::string const& next_mode)
-{
-    std::cout << "bind-key -Tcopy-mode-kakoune-" << mode
-        << " Any switch-client -Tcopy-mode-kakoune-" << next_mode << "\n";
-}
-
-void clear_table(InputRecord const& header)
-{
-    if (header.next_mode == "" || header.next_mode == "none")
-        return;
-    clear_mode(header.move_mode, header.next_mode);
-    if (header.extend_mode == "" || header.extend_mode == header.move_mode)
-        return;
-    clear_mode(header.extend_mode, header.next_mode);
-}
-
 void make_mapping(InputRecord const& record, std::string const& mode, std::string const& key, bool skip_begin_selection)
 {
-    std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " " << tmux_quote(key) << " '\\\n";
+    std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " '\\\n";
 
     for (auto const& action : record.actions) {
         if (skip_begin_selection && action == "begin-selection")
@@ -114,7 +105,7 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
     }
 
     if (record.next_mode != "none")
-        std::cout << "    switch-client -Tcopy-mode-kakoune-" << record.next_mode << " ;\\\n";
+        std::cout << "    switch-client -T"  << table_name(record.next_mode) << " ;\\\n";
 
     std::cout << "'\n";
 }
@@ -143,7 +134,6 @@ int main(int argc, char *argv[])
         InputRecord record = InputRecord::parse(line);
         if (record.is_header()) {
             header = record;
-            clear_table(header);
         } else {
             record.merge_header(header);
             make_mappings(record);
