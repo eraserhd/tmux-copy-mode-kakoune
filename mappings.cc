@@ -6,6 +6,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <vector>
 
 static const char* KEY_NAMES[] = {
         "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11",
@@ -32,7 +33,7 @@ struct input_record_t
     char *next_mode;
     char *move_keys[64];
     char *extend_keys[64];
-    char *actions[64];
+    std::vector<std::string> actions;
 };
 
 std::string tmux_quote(const char* s)
@@ -86,17 +87,14 @@ input_record_t parse_input_record(char *line)
     assert(extend_keys);
     tokenize_keys(extend_keys, result.extend_keys);
 
-    int i = 0;
     char *action;
     while (action = strtok_r(NULL, " \t\v", &saveptr)) {
         if (!strncmp(action, "->", 2))
             result.next_mode = action+2;
         else if (!strncmp(action, "extend-mode=", strlen("extend-mode=")))
             result.extend_mode = action+strlen("extend-mode=");
-        else {
-            result.actions[i++] = action;
-            assert(i < 64);
-        }
+        else
+            result.actions.push_back(action);
     }
 
     return result;
@@ -145,10 +143,10 @@ void make_mapping(const input_record_t* record, const char* mode, const char* ke
 {
     std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " " << tmux_quote(key) << " '\\\n";
 
-    for (int j = 0; record->actions[j]; j++) {
-        if (skip_begin_selection && !strcmp(record->actions[j], "begin-selection"))
+    for (auto const& action : record->actions) {
+        if (skip_begin_selection && action == "begin-selection")
             continue;
-        std::cout << "    send-keys -X " << record->actions[j] << " ;\\\n";
+        std::cout << "    send-keys -X " << action << " ;\\\n";
     }
 
     if (strcmp(record->next_mode, "none"))
