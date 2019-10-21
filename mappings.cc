@@ -28,16 +28,22 @@ std::set<std::string> make_all_key_names()
         "{", "|", "}", "~"
     };
 
+    enum Mods {
+        SHIFT   = 1,
+        CONTROL = 2,
+        META    = 4
+    };
+
     std::set<std::string> result;
     for (int modifiers = 0; modifiers < 8; modifiers++) {
         for (auto const& name : KEY_NAMES) {
             if (name.size() == 1) {
                 // ASCII chars
-                if (modifiers & 1)
+                if (modifiers & SHIFT)
                     continue; // Shifted version has own key name.
-                if (isupper(name[0] && (modifiers & 2)))
+                if (isupper(name[0] && (modifiers & CONTROL)))
                     continue; // C-x not different from C-X
-                if (NO_CONTROL.find(name[0]) != std::string::npos && (modifiers & 2))
+                if (NO_CONTROL.find(name[0]) != std::string::npos && (modifiers & CONTROL))
                     continue;
             }
 
@@ -45,11 +51,11 @@ std::set<std::string> make_all_key_names()
                 continue;
 
             std::string keyname;
-            if (modifiers & 1)
+            if (modifiers & SHIFT)
                 keyname += "S-";
-            if (modifiers & 2)
+            if (modifiers & CONTROL)
                 keyname += "C-";
-            if (modifiers & 4)
+            if (modifiers & META)
                 keyname += "M-";
             keyname += name;
             result.insert(std::move(keyname));
