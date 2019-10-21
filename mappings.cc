@@ -1,6 +1,3 @@
-#define _XOPEN_SOURCE 600
-
-#include <cassert>
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
@@ -158,27 +155,19 @@ void make_mappings(const input_record_t* record)
 
 int main(int argc, char *argv[])
 {
-    static char file[64 * 1024];
-    int result = fread(file, 1, sizeof(file), stdin);
-    assert(result > 0);
-    assert(result != sizeof(file)); /* Buffer too small */
-    file[result] = '\0';
+    std::string line;
 
-    char *line_saveptr;
-    (void)strtok_r(file, "\r\n", &line_saveptr);
-    (void)strtok_r(NULL, "\r\n", &line_saveptr);
+    std::getline(std::cin, line);
+    std::getline(std::cin, line);
 
-    char *line;
     input_record_t header;
-    while (line = strtok_r(NULL, "\r\n", &line_saveptr)) {
-        input_record_t record;
-
-        if (line[0] == '<')
+    while (std::getline(std::cin, line)) {
+        if (line.empty())
             continue;
-        if (isspace(line[0]))
+        if (line.rfind("<", 0) == 0)
             continue;
 
-        record = parse_input_record(line);
+        input_record_t record = parse_input_record(line);
         if (record.move_keys.empty() && record.extend_keys.empty()) {
             header = record;
             clear_table(&header);
