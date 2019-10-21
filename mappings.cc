@@ -29,9 +29,9 @@ static const char* KEY_NAMES[] = {
 
 struct input_record_t
 {
-    char *move_mode;
-    char *extend_mode;
-    char *next_mode;
+    std::string move_mode;
+    std::string extend_mode;
+    std::string next_mode;
     std::vector<std::string> move_keys;
     std::vector<std::string> extend_keys;
     std::vector<std::string> actions;
@@ -70,28 +70,26 @@ std::vector<std::string> tokenize_keys(std::string const& keys)
     }
 }
 
-input_record_t parse_input_record(char *line)
+input_record_t parse_input_record(std::string const& line)
 {
-    input_record_t result = {0};
+    input_record_t result;
+    std::istringstream in(line);
 
-    char *saveptr;
-    result.move_mode = strtok_r(line, " \t\v", &saveptr);
-    assert(result.move_mode);
+    in >> result.move_mode;
 
-    char *move_keys = strtok_r(NULL, " \t\v", &saveptr);
-    assert(move_keys);
-    result.move_keys = tokenize_keys(move_keys);
+    std::string keys;
+    in >> keys;
+    result.move_keys = tokenize_keys(keys);
 
-    char *extend_keys = strtok_r(NULL, " \t\v", &saveptr);
-    assert(extend_keys);
-    result.extend_keys = tokenize_keys(extend_keys);
+    in >> keys;
+    result.extend_keys = tokenize_keys(keys);
 
-    char *action;
-    while (action = strtok_r(NULL, " \t\v", &saveptr)) {
-        if (!strncmp(action, "->", 2))
-            result.next_mode = action+2;
-        else if (!strncmp(action, "extend-mode=", strlen("extend-mode=")))
-            result.extend_mode = action+strlen("extend-mode=");
+    std::string action;
+    while (in >> action) {
+        if (action.rfind("->", 0) == 0)
+            result.next_mode = action.substr(2);
+        else if (action.rfind("extend-mode=", 0) == 0)
+            result.extend_mode = action.substr(strlen("extend-mode="));
         else
             result.actions.push_back(action);
     }
@@ -99,7 +97,7 @@ input_record_t parse_input_record(char *line)
     return result;
 }
 
-void clear_mode(const char* mode, const char* next_mode)
+void clear_mode(std::string const& mode, std::string const& next_mode)
 {
     char keyname[64];
 
@@ -130,15 +128,15 @@ void clear_mode(const char* mode, const char* next_mode)
 
 void clear_table(const input_record_t* header)
 {
-    if (!header->next_mode || !strcmp(header->next_mode, "none"))
+    if (header->next_mode == "" || header->next_mode == "none")
         return;
     clear_mode(header->move_mode, header->next_mode);
-    if (!header->extend_mode || !strcmp(header->move_mode, header->extend_mode))
+    if (header->extend_mode == "" || header->extend_mode == header->move_mode)
         return;
     clear_mode(header->extend_mode, header->next_mode);
 }
 
-void make_mapping(const input_record_t* record, const char* mode, std::string const& key, bool skip_begin_selection)
+void make_mapping(const input_record_t* record, std::string const& mode, std::string const& key, bool skip_begin_selection)
 {
     std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " " << tmux_quote(key) << " '\\\n";
 
@@ -148,7 +146,7 @@ void make_mapping(const input_record_t* record, const char* mode, std::string co
         std::cout << "    send-keys -X " << action << " ;\\\n";
     }
 
-    if (strcmp(record->next_mode, "none"))
+    if (record->next_mode != "none")
         std::cout << "    switch-client -Tcopy-mode-kakoune-" << record->next_mode << " ;\\\n";
 
     std::cout << "'\n";
@@ -175,7 +173,7 @@ int main(int argc, char *argv[])
     (void)strtok_r(NULL, "\r\n", &line_saveptr);
 
     char *line;
-    input_record_t header = {0};
+    input_record_t header;
     while (line = strtok_r(NULL, "\r\n", &line_saveptr)) {
         input_record_t record;
 
@@ -189,11 +187,11 @@ int main(int argc, char *argv[])
             header = record;
             clear_table(&header);
         } else {
-            if (!record.next_mode)
+            if (record.next_mode.empty())
                 record.next_mode = header.next_mode;
-            if (!record.extend_mode)
+            if (record.extend_mode.empty())
                 record.extend_mode = header.extend_mode;
-            if (!record.extend_mode)
+            if (record.extend_mode.empty())
                 record.extend_mode = record.move_mode;
             make_mappings(&record);
         }
