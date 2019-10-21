@@ -104,7 +104,7 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
         std::cout << "    send-keys -X " << action << " ;\\\n";
     }
 
-    if (record.next_mode != "none")
+    if (!record.next_mode.empty())
         std::cout << "    switch-client -T"  << table_name(record.next_mode) << " ;\\\n";
 
     std::cout << "'\n";
