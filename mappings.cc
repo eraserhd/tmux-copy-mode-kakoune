@@ -89,6 +89,48 @@ struct InputRecord
         if (extend_mode.empty())
             extend_mode = move_mode;
     }
+
+    static InputRecord parse(std::string const& line)
+    {
+        InputRecord result;
+        std::istringstream in(line);
+
+        in >> result.move_mode;
+
+        std::string keys;
+        in >> keys;
+        result.move_keys = tokenize_keys(keys);
+
+        in >> keys;
+        result.extend_keys = tokenize_keys(keys);
+
+        std::string action;
+        while (in >> action) {
+            if (action.rfind("->", 0) == 0)
+                result.next_mode = action.substr(2);
+            else if (action.rfind("extend-mode=", 0) == 0)
+                result.extend_mode = action.substr(std::string("extend-mode=").size());
+            else
+                result.actions.push_back(action);
+        }
+
+        return result;
+    }
+
+private:
+    static std::vector<std::string> tokenize_keys(std::string const& keys)
+    {
+        if (keys == "--")
+            return {};
+        if (keys == ",")
+            return {","};
+        std::vector<std::string> result;
+        std::istringstream in(keys);
+        std::string token;
+        while (std::getline(in, token, ','))
+            result.emplace_back(std::move(token));
+        return result;
+    }
 };
 
 std::string tmux_quote(std::string const& s)
@@ -101,47 +143,6 @@ std::string tmux_quote(std::string const& s)
             result += ch;
     }
     result += "'";
-    return result;
-}
-
-std::vector<std::string> tokenize_keys(std::string const& keys)
-{
-    if (keys == "--")
-        return {};
-    if (keys == ",")
-        return {","};
-    std::vector<std::string> result;
-    std::istringstream in(keys);
-    std::string token;
-    while (std::getline(in, token, ','))
-        result.emplace_back(std::move(token));
-    return result;
-}
-
-InputRecord parse_input_record(std::string const& line)
-{
-    InputRecord result;
-    std::istringstream in(line);
-
-    in >> result.move_mode;
-
-    std::string keys;
-    in >> keys;
-    result.move_keys = tokenize_keys(keys);
-
-    in >> keys;
-    result.extend_keys = tokenize_keys(keys);
-
-    std::string action;
-    while (in >> action) {
-        if (action.rfind("->", 0) == 0)
-            result.next_mode = action.substr(2);
-        else if (action.rfind("extend-mode=", 0) == 0)
-            result.extend_mode = action.substr(std::string("extend-mode=").size());
-        else
-            result.actions.push_back(action);
-    }
-
     return result;
 }
 
@@ -201,7 +202,7 @@ int main(int argc, char *argv[])
         if (line.rfind("<", 0) == 0)
             continue;
 
-        InputRecord record = parse_input_record(line);
+        InputRecord record = InputRecord::parse(line);
         if (record.is_header()) {
             header = record;
             clear_table(header);
