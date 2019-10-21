@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <string>
 
 static const char* KEY_NAMES[] = {
@@ -36,26 +37,19 @@ typedef struct input_record_tag {
 
 std::string tmux_quote(const char* s)
 {
-        char *result = (char*)malloc(3 + strlen(s)*5);
-        char *p = result;
-        *p++ = '\'';
-        for (; *s; s++) {
-                switch (*s) {
-                case '\'':
-                        *p++ = '\'';
-                        *p++ = '"';
-                        *p++ = '\'';
-                        *p++ = '"';
-                        *p++ = '\'';
-                        break;
-                default:
-                        *p++ = *s;
-                        break;
-                }
+    std::string result = "\'";
+    for (; *s; s++) {
+        switch (*s) {
+        case '\'':
+            result += "'\"'\"'";
+            break;
+        default:
+            result += *s;
+            break;
         }
-        *p++ = '\'';
-        *p++ = '\0';
-        return result;
+    }
+    result += "'";
+    return result;
 }
 
 void tokenize_keys(char *keys, char *output[64])
@@ -130,9 +124,9 @@ void clear_mode(const char* mode, const char* next_mode)
                         if (modifiers & 4)
                                 strcat(keyname, "M-");
                         strcat(keyname, KEY_NAMES[i]);
-                        auto quoted_key = tmux_quote(keyname);
-                        printf("bind-key -Tcopy-mode-kakoune-%s %s switch-client -Tcopy-mode-kakoune-%s\n",
-                                mode, quoted_key.c_str(), next_mode);
+                        std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " "
+                            << tmux_quote(keyname) << " switch-client -Tcopy-mode-kakoune-"
+                            << next_mode << std::endl;
                 }
         }
 }
