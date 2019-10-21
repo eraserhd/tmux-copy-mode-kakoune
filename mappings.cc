@@ -58,16 +58,14 @@ std::vector<std::string> tokenize_keys(std::string const& keys)
 {
     if (keys == ",")
         return {","};
-    else if (keys == "--")
+    if (keys == "--")
         return {};
-    else {
-        std::vector<std::string> result;
-        std::istringstream in(keys);
-        std::string token;
-        while (std::getline(in, token, ','))
-            result.emplace_back(std::move(token));
-        return result;
-    }
+    std::vector<std::string> result;
+    std::istringstream in(keys);
+    std::string token;
+    while (std::getline(in, token, ','))
+        result.emplace_back(std::move(token));
+    return result;
 }
 
 input_record_t parse_input_record(std::string const& line)
@@ -99,8 +97,6 @@ input_record_t parse_input_record(std::string const& line)
 
 void clear_mode(std::string const& mode, std::string const& next_mode)
 {
-    char keyname[64];
-
     for (int modifiers = 0; modifiers < 8; modifiers++) {
         for (int i = 0; i < sizeof(KEY_NAMES)/sizeof(KEY_NAMES[0]); i++) {
             if (strlen(KEY_NAMES[i]) == 1) {
@@ -111,14 +107,14 @@ void clear_mode(std::string const& mode, std::string const& next_mode)
                     continue; /* C-x not different from C-X */
             }
 
-            keyname[0] = '\0';
+            std::string keyname;
             if (modifiers & 1)
-                strcat(keyname, "S-");
+                keyname += "S-";
             if (modifiers & 2)
-                strcat(keyname, "C-");
+                keyname += "C-";
             if (modifiers & 4)
-                strcat(keyname, "M-");
-            strcat(keyname, KEY_NAMES[i]);
+                keyname += "M-";
+            keyname += KEY_NAMES[i];
             std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " "
                 << tmux_quote(keyname) << " switch-client -Tcopy-mode-kakoune-"
                 << next_mode << std::endl;
