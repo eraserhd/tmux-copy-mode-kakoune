@@ -7,23 +7,58 @@
 #include <sstream>
 #include <vector>
 
-const std::set<std::string> KEY_NAMES{
-    "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11",
-    "F12", "IC", "Insert", "DC", "Delete", "Home", "End", "NPage",
-    "PageDown", "PgDn", "PPage", "PageUp", "PgUp", "Tab", "BTab", "Space",
-    "BSpace", "Enter", "Escape", "Up", "Down", "Left", "Right", "KP/",
-    "KP*", "KP-", "KP7", "KP8", "KP9", "KP+", "KP4", "KP5", "KP6", "KP1",
-    "KP2", "KP3", "KPEnter", "KP0", "KP.",
-    "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", "-", ".", "/",
-    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-    ":", ";", "<", "=", ">", "?", "@",
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
-    "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-    "[", "\\", "]", "^", "_", "`",
-    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
-    "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-    "{", "|", "}", "~"
-};
+std::set<std::string> make_all_key_names()
+{
+    static const std::string NO_CONTROL = "\"$%&*/`{|}~";
+    static const std::set<std::string> KEY_NAMES{
+        "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11",
+        "F12", "IC", "Insert", "DC", "Delete", "Home", "End", "NPage",
+        "PageDown", "PgDn", "PPage", "PageUp", "PgUp", "Tab", "BTab", "Space",
+        "BSpace", "Enter", "Escape", "Up", "Down", "Left", "Right", "KP/",
+        "KP*", "KP-", "KP7", "KP8", "KP9", "KP+", "KP4", "KP5", "KP6", "KP1",
+        "KP2", "KP3", "KPEnter", "KP0", "KP.",
+        "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", "-", ".", "/",
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+        ":", ";", "<", "=", ">", "?", "@",
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+        "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+        "[", "\\", "]", "^", "_", "`",
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
+        "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+        "{", "|", "}", "~"
+    };
+
+    std::set<std::string> result;
+    for (int modifiers = 0; modifiers < 8; modifiers++) {
+        for (auto const& name : KEY_NAMES) {
+            if (name.size() == 1) {
+                // ASCII chars
+                if (modifiers & 1)
+                    continue; // Shifted version has own key name.
+                if (isupper(name[0] && (modifiers & 2)))
+                    continue; // C-x not different from C-X
+                if (NO_CONTROL.find(name[0]) != std::string::npos && (modifiers & 2))
+                    continue;
+            }
+
+            if (name == "Escape" && modifiers)
+                continue;
+
+            std::string keyname;
+            if (modifiers & 1)
+                keyname += "S-";
+            if (modifiers & 2)
+                keyname += "C-";
+            if (modifiers & 4)
+                keyname += "M-";
+            keyname += name;
+            result.insert(std::move(keyname));
+        }
+    }
+    return result;
+}
+
+static const std::set<std::string> ALL_KEY_NAMES = make_all_key_names();
 
 struct InputRecord
 {
@@ -91,34 +126,10 @@ InputRecord parse_input_record(std::string const& line)
 
 void clear_mode(std::string const& mode, std::string const& next_mode)
 {
-    static const std::string NO_CONTROL = "\"$%&*/`{|}~";
-    for (int modifiers = 0; modifiers < 8; modifiers++) {
-        for (auto const& name : KEY_NAMES) {
-            if (name.size() == 1) {
-                // ASCII chars
-                if (modifiers & 1)
-                    continue; // Shifted version has own key name.
-                if (isupper(name[0] && (modifiers & 2)))
-                    continue; // C-x not different from C-X
-                if (NO_CONTROL.find(name[0]) != std::string::npos && (modifiers & 2))
-                    continue;
-            }
-
-            if (name == "Escape" && modifiers)
-                continue;
-
-            std::string keyname;
-            if (modifiers & 1)
-                keyname += "S-";
-            if (modifiers & 2)
-                keyname += "C-";
-            if (modifiers & 4)
-                keyname += "M-";
-            keyname += name;
-            std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " "
-                << tmux_quote(keyname) << " switch-client -Tcopy-mode-kakoune-"
-                << next_mode << std::endl;
-        }
+    for (auto const& keyname : ALL_KEY_NAMES) {
+        std::cout << "bind-key -Tcopy-mode-kakoune-" << mode << " "
+            << tmux_quote(keyname) << " switch-client -Tcopy-mode-kakoune-"
+            << next_mode << std::endl;
     }
 }
 
