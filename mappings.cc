@@ -66,7 +66,7 @@ struct InputRecord
         result.extend_keys = tokenize_keys(keys);
 
         std::string action;
-        while (in >> action) {
+        while (read_word(in,action)) {
             if (action.rfind("->", 0) == 0)
                 result.next_mode = action.substr(2);
             else if (action.rfind("extend-mode=", 0) == 0)
@@ -79,6 +79,40 @@ struct InputRecord
     }
 
 private:
+    static bool read_word(std::istream& in, std::string& word)
+    {
+        word.clear();
+        in >> std::ws;
+
+        bool have_word = false;
+        bool in_quotes = false;
+        char ch;
+        while (in.get(ch)) {
+            if (ch == '\'' and in_quotes and in.peek() == '\'') {
+                have_word = true;
+                in.get(ch);
+                word += '\'';
+                continue;
+            }
+            if (ch == '\'' and in_quotes) {
+                have_word = true;
+                in_quotes = false;
+                continue;
+            }
+            if (ch == '\'' and not in_quotes) {
+                have_word = true;
+                in_quotes = true;
+                continue;
+            }
+            if (isspace(ch) and not in_quotes)
+                break;
+            have_word = true;
+            word += ch;
+        }
+
+        return have_word;
+    }
+
     static std::vector<std::string> tokenize_keys(std::string const& keys)
     {
         if (keys == "--")
