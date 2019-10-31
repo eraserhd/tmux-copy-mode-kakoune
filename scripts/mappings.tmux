@@ -147,6 +147,10 @@ bind-key -Tcopy-mode-vi 'M-;' '\
 '
 bind-key -Tcopy-mode-vi 'y' '\
     send-keys -X copy-selection-no-clear ;\
+    send-keys -X cancel ;\
+'
+bind-key -Tcopy-mode-vi 'M-y' '\
+    send-keys -X copy-selection-no-clear ;\
 '
 bind-key -Tcopy-mode-kakoune-goto 'g' '\
     send-keys -X history-top ;\
@@ -305,5 +309,9 @@ bind-key -Tcopy-mode-kakoune-goto-extend 'C' '\
     send-keys -X middle-line ;\
 '
 bind-key -Tcopy-mode-kakoune-user 'y' '\
+    send-keys -X copy-selection-no-clear ;\
+    send-keys -X cancel ;\
+'
+bind-key -Tcopy-mode-kakoune-user 'M-y' '\
     send-keys -X copy-selection-no-clear ;\
 '

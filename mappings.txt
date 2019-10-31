@@ -21,7 +21,8 @@ normal C-u          --        halfpage-up begin-selection
 normal C-d          --        halfpage-down begin-selection
 normal ;            --        clear-selection
 normal M-;          --        other-end
-normal y            --        copy-selection-no-clear
+normal y            --        copy-selection-no-clear cancel
+normal M-y          --        copy-selection-no-clear
 goto   --           --        extend-mode=goto-extend
 goto   g,G,k,K      g,G,k,K   history-top begin-selection
 goto   l,L          l,L       end-of-line cursor-left begin-selection
@@ -33,6 +34,7 @@ goto   t,T          t,T       top-line begin-selection
 goto   b,B          b,B       bottom-line begin-selection
 goto   c,C          c,C       middle-line begin-selection
 user   --           --
-user   y            --        copy-selection-no-clear
+user   y            --        copy-selection-no-clear cancel
+user   M-y          --        copy-selection-no-clear
 
 <1> Extend versions are identical to move versions, except begin-selection is omitted.
