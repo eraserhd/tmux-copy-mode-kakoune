@@ -92,13 +92,13 @@ bind-key -Tcopy-mode-vi 'E' '\
     send-keys -X next-word-end ;\
 '
 bind-key -Tcopy-mode-vi 'f' '\
-    command-prompt -1 -p "(prompt)" "\
+    command-prompt -1 -p "(select onto next char)" "\
         send-keys -X begin-selection ;\
         send-keys -X jump-forward \"%%%\" ;\
     " ;\
 '
 bind-key -Tcopy-mode-vi 'F' '\
-    command-prompt -1 -p "(prompt)" "\
+    command-prompt -1 -p "(select onto next char)" "\
         send-keys -X jump-forward \"%%%\" ;\
     " ;\
 '

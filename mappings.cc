@@ -44,6 +44,7 @@ struct InputRecord
     std::string move_mode;
     std::string extend_mode;
     std::string next_mode;
+    std::string prompt{"(prompt)"};
     std::vector<std::string> move_keys;
     std::vector<std::string> extend_keys;
     std::vector<std::string> actions;
@@ -104,6 +105,8 @@ struct InputRecord
                 result.next_mode = action.substr(2);
             else if (action.rfind("extend-mode=", 0) == 0)
                 result.extend_mode = action.substr(std::string("extend-mode=").size());
+            else if (action.rfind("prompt=", 0) == 0)
+                result.prompt = action.substr(std::string("prompt=").size());
             else
                 result.actions.push_back(action);
         }
@@ -165,7 +168,7 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
 {
     std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " '\\\n";
     if (record.wants_prompt()) {
-        std::cout << "    command-prompt -1 -p \"(prompt)\" \"\\\n";
+        std::cout << "    command-prompt -1 -p \"" << escape_double_quotes(record.prompt) << "\" \"\\\n";
         std::cout << escape_double_quotes(record.format_actions("        ", skip_begin_selection));
         std::cout << "    \" ;\\\n";
     } else {
