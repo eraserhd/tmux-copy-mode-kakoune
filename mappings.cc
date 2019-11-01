@@ -20,6 +20,18 @@ std::string tmux_quote(std::string const& s)
     return result;
 }
 
+std::string escape_double_quotes(std::string const& s)
+{
+    std::string result = "";
+    for (char ch : s) {
+        switch (ch) {
+        case '"':  result += "\\\""; break;
+        default:   result += ch;     break;
+        }
+    }
+    return result;
+}
+
 std::string table_name(std::string const& s)
 {
     if (s == "normal")
@@ -154,7 +166,7 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
     std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " '\\\n";
     if (record.wants_prompt()) {
         std::cout << "    command-prompt -1 -p \"(prompt)\" \"\\\n";
-        std::cout << record.format_actions("        ", skip_begin_selection);
+        std::cout << escape_double_quotes(record.format_actions("        ", skip_begin_selection));
         std::cout << "    \" ;\\\n";
     } else {
         std::cout << record.format_actions("    ", skip_begin_selection);
