@@ -168,7 +168,14 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
 {
     std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " '\\\n";
     if (record.wants_prompt()) {
-        std::cout << "    command-prompt -1 -p \"" << escape_double_quotes(record.prompt) << "\" \"\\\n";
+        std::string prompt = escape_double_quotes(record.prompt);
+        if (skip_begin_selection) {
+            auto pos = prompt.find("select");
+            if (pos != std::string::npos) {
+                prompt.replace(pos, pos+5, "extend");
+            }
+        }
+        std::cout << "    command-prompt -1 -p \"" << prompt << "\" \"\\\n";
         std::cout << escape_double_quotes(record.format_actions("        ", skip_begin_selection));
         std::cout << "    \" ;\\\n";
     } else {

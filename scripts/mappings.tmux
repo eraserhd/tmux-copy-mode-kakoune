@@ -98,7 +98,7 @@ bind-key -Tcopy-mode-vi 'f' '\
     " ;\
 '
 bind-key -Tcopy-mode-vi 'F' '\
-    command-prompt -1 -p "(select onto next char)" "\
+    command-prompt -1 -p "(extend onto next char)" "\
         send-keys -X jump-forward \"%%%\" ;\
     " ;\
 '
