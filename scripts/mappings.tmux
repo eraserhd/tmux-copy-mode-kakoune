@@ -113,6 +113,17 @@ bind-key -Tcopy-mode-vi 'M-F' '\
         send-keys -X jump-backward \"%%%\" ;\
     " ;\
 '
+bind-key -Tcopy-mode-vi 't' '\
+    command-prompt -1 -p "(select to next char)" "\
+        send-keys -X begin-selection ;\
+        send-keys -X jump-to-forward \"%%%\" ;\
+    " ;\
+'
+bind-key -Tcopy-mode-vi 'T' '\
+    command-prompt -1 -p "(extend to next char)" "\
+        send-keys -X jump-to-forward \"%%%\" ;\
+    " ;\
+'
 bind-key -Tcopy-mode-vi '%' '\
     send-keys -X history-top ;\
     send-keys -X start-of-line ;\
