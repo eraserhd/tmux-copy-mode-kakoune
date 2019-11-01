@@ -91,6 +91,17 @@ bind-key -Tcopy-mode-vi 'e' '\
 bind-key -Tcopy-mode-vi 'E' '\
     send-keys -X next-word-end ;\
 '
+bind-key -Tcopy-mode-vi 'f' '\
+    command-prompt -1 -p "(prompt)" "\
+    send-keys -X begin-selection ;\
+    send-keys -X jump-forward \"%%%\" ;\
+    " ;\
+'
+bind-key -Tcopy-mode-vi 'F' '\
+    command-prompt -1 -p "(prompt)" "\
+    send-keys -X jump-forward \"%%%\" ;\
+    " ;\
+'
 bind-key -Tcopy-mode-vi '%' '\
     send-keys -X history-top ;\
     send-keys -X start-of-line ;\

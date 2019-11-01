@@ -41,6 +41,14 @@ struct InputRecord
         return move_keys.empty() && extend_keys.empty();
     }
 
+    bool wants_prompt() const
+    {
+        for (auto const& action : actions)
+            if (action.find("%%%") != std::string::npos)
+                return true;
+        return false;
+    }
+
     void merge_header(InputRecord const& header)
     {
         if (next_mode.empty())
@@ -132,6 +140,10 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
 {
     std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " '\\\n";
 
+    if (record.wants_prompt()) {
+        std::cout << "    command-prompt -1 -p \"(prompt)\" \"\\\n";
+    }
+
     for (auto const& action : record.actions) {
         if (skip_begin_selection && action == "begin-selection")
             continue;
@@ -140,6 +152,10 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
 
     if (!record.next_mode.empty())
         std::cout << "    switch-client -T"  << table_name(record.next_mode) << " ;\\\n";
+
+    if (record.wants_prompt()) {
+        std::cout << "    \" ;\\\n";
+    }
 
     std::cout << "'\n";
 }
