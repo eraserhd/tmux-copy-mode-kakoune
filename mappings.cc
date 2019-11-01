@@ -152,20 +152,13 @@ private:
 void make_mapping(InputRecord const& record, std::string const& mode, std::string const& key, bool skip_begin_selection)
 {
     std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " '\\\n";
-
-    std::string indent = "    ";
     if (record.wants_prompt()) {
         std::cout << "    command-prompt -1 -p \"(prompt)\" \"\\\n";
-        indent += "    ";
-    }
-
-    std::string actions = record.format_actions(indent, skip_begin_selection);
-    std:: cout << actions;
-
-    if (record.wants_prompt()) {
+        std::cout << record.format_actions("        ", skip_begin_selection);
         std::cout << "    \" ;\\\n";
+    } else {
+        std::cout << record.format_actions("    ", skip_begin_selection);
     }
-
     std::cout << "'\n";
 }
 
