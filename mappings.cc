@@ -59,6 +59,19 @@ struct InputRecord
             extend_mode = move_mode;
     }
 
+    std::string format_actions(std::string const& indent, bool skip_begin_selection) const
+    {
+        std::string result;
+        for (auto const& action : actions) {
+            if (skip_begin_selection && action == "begin-selection")
+                continue;
+            result += indent + "send-keys -X " + action + " ;\\\n";
+        }
+        if (not next_mode.empty())
+            result += indent + "switch-client -T" + table_name(next_mode) + " ;\\\n";
+        return result;
+    }
+
     static InputRecord parse(std::string const& line)
     {
         InputRecord result;
@@ -146,14 +159,8 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
         indent += "    ";
     }
 
-    for (auto const& action : record.actions) {
-        if (skip_begin_selection && action == "begin-selection")
-            continue;
-        std::cout << indent << "send-keys -X " << action << " ;\\\n";
-    }
-
-    if (!record.next_mode.empty())
-        std::cout << indent << "switch-client -T"  << table_name(record.next_mode) << " ;\\\n";
+    std::string actions = record.format_actions(indent, skip_begin_selection);
+    std:: cout << actions;
 
     if (record.wants_prompt()) {
         std::cout << "    \" ;\\\n";
