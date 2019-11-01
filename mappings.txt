@@ -13,6 +13,7 @@ normal w            W         cursor-right begin-selection next-word cursor-left
 normal b            B         begin-selection previous-word
 normal e            E         begin-selection next-word-end
 normal f            F         prompt='(select onto next char)' begin-selection 'jump-forward "%%%"'
+normal M-f          M-F       prompt='(select onto previous char)' begin-selection 'jump-backward "%%%"'
 normal %            --        history-top start-of-line begin-selection history-bottom end-of-line cursor-left
 normal M-h          M-H       begin-selection start-of-line
 normal M-l          M-L       begin-selection end-of-line cursor-left
