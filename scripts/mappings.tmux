@@ -93,13 +93,13 @@ bind-key -Tcopy-mode-vi 'E' '\
 '
 bind-key -Tcopy-mode-vi 'f' '\
     command-prompt -1 -p "(prompt)" "\
-    send-keys -X begin-selection ;\
-    send-keys -X jump-forward \"%%%\" ;\
+        send-keys -X begin-selection ;\
+        send-keys -X jump-forward \"%%%\" ;\
     " ;\
 '
 bind-key -Tcopy-mode-vi 'F' '\
     command-prompt -1 -p "(prompt)" "\
-    send-keys -X jump-forward \"%%%\" ;\
+        send-keys -X jump-forward \"%%%\" ;\
     " ;\
 '
 bind-key -Tcopy-mode-vi '%' '\

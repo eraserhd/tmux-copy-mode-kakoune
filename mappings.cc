@@ -140,18 +140,20 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
 {
     std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " '\\\n";
 
+    std::string indent = "    ";
     if (record.wants_prompt()) {
         std::cout << "    command-prompt -1 -p \"(prompt)\" \"\\\n";
+        indent += "    ";
     }
 
     for (auto const& action : record.actions) {
         if (skip_begin_selection && action == "begin-selection")
             continue;
-        std::cout << "    send-keys -X " << action << " ;\\\n";
+        std::cout << indent << "send-keys -X " << action << " ;\\\n";
     }
 
     if (!record.next_mode.empty())
-        std::cout << "    switch-client -T"  << table_name(record.next_mode) << " ;\\\n";
+        std::cout << indent << "switch-client -T"  << table_name(record.next_mode) << " ;\\\n";
 
     if (record.wants_prompt()) {
         std::cout << "    \" ;\\\n";
