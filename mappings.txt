@@ -23,7 +23,7 @@ normal PageUp,C-b   --        page-up begin-selection
 normal PageDown,C-f --        page-down begin-selection
 normal C-u          --        halfpage-up begin-selection
 normal C-d          --        halfpage-down begin-selection
-normal ;            --        clear-selection
+normal ;            --        clear-selection begin-selection
 normal M-;          --        other-end
 normal y            --        copy-selection-no-clear cancel
 normal M-y          --        copy-selection-no-clear

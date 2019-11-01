@@ -185,6 +185,7 @@ bind-key -Tcopy-mode-vi 'C-d' '\
 '
 bind-key -Tcopy-mode-vi ';' '\
     send-keys -X clear-selection ;\
+    send-keys -X begin-selection ;\
 '
 bind-key -Tcopy-mode-vi 'M-;' '\
     send-keys -X other-end ;\
