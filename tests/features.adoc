@@ -1,0 +1,32 @@
+`tmux-copy-mode-kakoune` Features
+=================================
+:quotes.%(|): #selection
+:tags.selection: <u>|</u>
+
+Normal Mode
+-----------
+
+Yanking Text
+~~~~~~~~~~~~
+
+.y
+======================
+When in copy mode
+displaying:
+....
+Hel%(lo, worl)d!
+....
+pressing `y`
+copies `+lo, worl+`
+and leaves copy mode.
+======================
+
+.Meta-y
+======================
+When in copy mode
+displaying `Hel%(lo, worl)d!`,
+pressing `Meta-y`
+copies `+lo, worl+`
+and stays in copy mode.
+======================
+
