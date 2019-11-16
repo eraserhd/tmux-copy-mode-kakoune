@@ -78,10 +78,10 @@ struct InputRecord
         for (auto const& action : actions) {
             if (skip_begin_selection && action == "begin-selection")
                 continue;
-            result += indent + "send-keys -X " + action + " ;\\\n";
+            result += indent + "send-keys -X " + action + "\n";
         }
         if (not next_mode.empty())
-            result += indent + "switch-client -T" + table_name(next_mode) + " ;\\\n";
+            result += indent + "switch-client -T" + table_name(next_mode) + "\n";
         return result;
     }
 
@@ -166,7 +166,7 @@ private:
 
 void make_mapping(InputRecord const& record, std::string const& mode, std::string const& key, bool skip_begin_selection)
 {
-    std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " '\\\n";
+    std::cout << "bind-key -T" << table_name(mode) << " " << tmux_quote(key) << " {\n";
     if (record.wants_prompt()) {
         std::string prompt = escape_double_quotes(record.prompt);
         if (skip_begin_selection) {
@@ -175,13 +175,13 @@ void make_mapping(InputRecord const& record, std::string const& mode, std::strin
                 prompt.replace(pos, pos+5, "extend");
             }
         }
-        std::cout << "    command-prompt -1 -p \"" << prompt << "\" \"\\\n";
-        std::cout << escape_double_quotes(record.format_actions("        ", skip_begin_selection));
-        std::cout << "    \" ;\\\n";
+        std::cout << "    command-prompt -1 -p \"" << prompt << "\" {\n";
+        std::cout << record.format_actions("        ", skip_begin_selection);
+        std::cout << "    }\n";
     } else {
         std::cout << record.format_actions("    ", skip_begin_selection);
     }
-    std::cout << "'\n";
+    std::cout << "}\n";
 }
 
 void make_mappings(InputRecord const& record)
