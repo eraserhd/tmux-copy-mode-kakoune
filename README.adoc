@@ -1,1 +1,10 @@
-= tmux-copy-mode-kakoune
+tmux-copy-mode-kakoune
+======================
+
+
+Configuration
+-------------
+
+*@copy_mode_kakoune_after_yank@*::
+    Bash code to be executed after a selection has been copied.  On Mac this
+    could be `tmux show-buffer |reattach-to-user-namespace pbcopy`

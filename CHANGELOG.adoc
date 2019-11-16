@@ -2,3 +2,5 @@
 
 == Unreleased
 
+* Add `@copy_mode_kakoune_after_yank` to allow user commands to run after the
+  yank buffer is populated.

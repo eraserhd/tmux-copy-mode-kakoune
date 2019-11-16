@@ -38,7 +38,7 @@ goto   t,T          t,T       top-line begin-selection
 goto   b,B          b,B       bottom-line begin-selection
 goto   c,C          c,C       middle-line begin-selection
 user   --           --
-user   y            --        copy-selection-no-clear cancel
-user   M-y          --        copy-selection-no-clear
+user   y            --        copy-selection-no-clear !after-yank cancel
+user   M-y          --        copy-selection-no-clear !after-yank
 
 <1> Extend versions are identical to move versions, except begin-selection is omitted.

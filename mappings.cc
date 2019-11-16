@@ -78,7 +78,10 @@ struct InputRecord
         for (auto const& action : actions) {
             if (skip_begin_selection && action == "begin-selection")
                 continue;
-            result += indent + "send-keys -X " + action + "\n";
+            if (action.rfind("!", 0) != std::string::npos)
+                result += indent + "run-shell \"#{@copy_mode_kakoune_scripts}/" + action.substr(1) + "\"\n";
+            else
+                result += indent + "send-keys -X " + action + "\n";
         }
         if (not next_mode.empty())
             result += indent + "switch-client -T" + table_name(next_mode) + "\n";

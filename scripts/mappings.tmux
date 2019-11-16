@@ -355,8 +355,10 @@ bind-key -Tcopy-mode-kakoune-goto-extend 'C' {
 }
 bind-key -Tcopy-mode-kakoune-user 'y' {
     send-keys -X copy-selection-no-clear
+    run-shell "#{@copy_mode_kakoune_scripts}/after-yank"
     send-keys -X cancel
 }
 bind-key -Tcopy-mode-kakoune-user 'M-y' {
     send-keys -X copy-selection-no-clear
+    run-shell "#{@copy_mode_kakoune_scripts}/after-yank"
 }

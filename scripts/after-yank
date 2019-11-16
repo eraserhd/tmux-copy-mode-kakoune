@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Allow the user to process the yank buffer
+exec "$SHELL" -c "$(tmux display-message -p "#{@copy_mode_kakoune_after_yank}")"
