@@ -25,8 +25,8 @@ normal C-u          --        halfpage-up begin-selection
 normal C-d          --        halfpage-down begin-selection
 normal ;            --        clear-selection begin-selection
 normal M-;          --        other-end
-normal y            --        copy-selection-no-clear cancel
-normal M-y          --        copy-selection-no-clear
+normal y            --        copy-selection-no-clear !after-yank cancel
+normal M-y          --        copy-selection-no-clear !after-yank
 goto   --           --        extend-mode=goto-extend
 goto   g,G,k,K      g,G,k,K   history-top begin-selection
 goto   l,L          l,L       end-of-line cursor-left begin-selection

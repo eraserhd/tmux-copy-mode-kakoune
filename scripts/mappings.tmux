@@ -192,10 +192,12 @@ bind-key -Tcopy-mode-vi 'M-;' {
 }
 bind-key -Tcopy-mode-vi 'y' {
     send-keys -X copy-selection-no-clear
+    run-shell "#{@copy_mode_kakoune_scripts}/after-yank"
     send-keys -X cancel
 }
 bind-key -Tcopy-mode-vi 'M-y' {
     send-keys -X copy-selection-no-clear
+    run-shell "#{@copy_mode_kakoune_scripts}/after-yank"
 }
 bind-key -Tcopy-mode-kakoune-goto 'g' {
     send-keys -X history-top
